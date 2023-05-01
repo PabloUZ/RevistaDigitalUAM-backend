@@ -11,13 +11,12 @@ const port = 4000;
 app.use(cors());
 
 app.use(express.json());
+app.use(express.urlencoded({extended:true}));
 
+// Articles
+const articleRoutes = require("./routes/article");
 
-app.get("/prueba", (req,res) => {
-    return res.status(200).json({
-        "text":"Hola mundo"
-    })
-});
+app.use("/api", articleRoutes)
 
 
 
