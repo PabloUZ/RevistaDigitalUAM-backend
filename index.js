@@ -18,6 +18,10 @@ const articleRoutes = require("./routes/article");
 
 app.use("/api", articleRoutes)
 
+// Users
+const userRoutes = require("./routes/user");
+
+app.use("/api", userRoutes);
 
 
 

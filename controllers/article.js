@@ -3,6 +3,7 @@ const fs = require("fs");
 const validator = require("validator");
 const Article = require("../models/Article");
 const path = require("path");
+const User = require("../models/User");
 
 
 const validate = (params) => {
@@ -11,8 +12,7 @@ const validate = (params) => {
         const desc = validator.isLength(params.description, {min: 5, max: undefined});
         const url = validator.isEmpty(params.url);
         const body = validator.isEmpty(params.body);
-
-        if(!title || !desc || url || body){
+        if(!title || !desc || url || body ){
             throw new Error("Param is not correct");
         }
         return true;
@@ -23,6 +23,12 @@ const validate = (params) => {
 
 const POST = async (req, res) => {
     let params = req.body;
+    const id = params.iduser;
+    let user = await User.find({cc: id}).exec();
+    if (!user){
+        return res.status(400).json({Error: "Something failed"});
+    }
+    user = user[0];
     params.title = params.title.split(" ").join("-");
     params.url = `./articles/article_${params.title}.txt`;
     if (!validate(params)){
@@ -46,7 +52,7 @@ const POST = async (req, res) => {
             message: `Error: ${err}`,
         });
     }
-    const article = new Article({title: params.title, description: params.description, url: params.url, status: "received"});
+    const article = new Article({title: params.title, description: params.description, url: params.url, status: "received", author: user});
     try{
         article.save();
         return res.status(200).json({
@@ -85,7 +91,12 @@ const GETFILE = async (req,res) => {
 
     fs.access(route, (err) => {
         if (!err){
-            return res.sendFile(path.resolve(route))
+            fs.readFile(route, 'utf8', (err, data) => {
+                if (err) {
+                    return res.status(500).json({ error: 'Internal server error' });
+                }
+                return res.status(200).json({ content: data });
+            });
         }
         else{
             return res.status(404).json({Error: "Not found"});

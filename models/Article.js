@@ -1,5 +1,5 @@
 const { Schema, model } = require("mongoose");
-const User = require("./User");
+const User = require("../models/User");
 
 const ArticleSchema = Schema({
     title: String,
@@ -10,7 +10,11 @@ const ArticleSchema = Schema({
     },
     url: String,
     status: String,
-    author: User
+    author: {
+        type: Schema.Types.ObjectId,
+        ref: User,
+        default: undefined
+    }
 });
 
 
